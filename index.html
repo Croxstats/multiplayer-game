@@ -24,6 +24,10 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 #landscapeLock h2{color:#FFD700;font-size:1.5rem;margin:0 0 10px;font-family:'Orbitron',sans-serif;}
 #landscapeLock p{color:#aaa;font-size:0.9rem;font-family:'Orbitron',sans-serif;}
 
+@media screen and (min-width:1024px){
+  #landscapeLock{display:none!important;}
+}
+
 /* ── MENU ── */
 #mainMenu{
   position:fixed;inset:0;
@@ -557,7 +561,7 @@ function resolve(b1,b2){
 function allStopped(){return balls.every(b=>!b.active());}
 function aimLine(){
   if(!showDir||!balls||!allStopped()||waitingNext)return;
-  var lineLen=trainingMode?Math.min(240,cx*0.25):Math.min(110,cx*0.12);
+  var lineLen=trainingMode?Math.min(240,canvas.width*0.25):Math.min(110,canvas.width*0.12);
   var ex=cueBall.x+Math.cos(aimAngle)*lineLen,ey=cueBall.y+Math.sin(aimAngle)*lineLen;
   ctx.beginPath();
   ctx.moveTo(cueBall.x+Math.cos(aimAngle)*cueBall.r+2,cueBall.y+Math.sin(aimAngle)*cueBall.r+2);
@@ -719,32 +723,28 @@ document.addEventListener("keydown",e=>{
 // ─── Landscape Lock ──────────────────────────────────
 function checkOrientation(){
   var lock=document.getElementById("landscapeLock");
-  var menu=document.getElementById("mainMenu");
-  var game=document.getElementById("gameUI");
-  var isPortrait=window.innerHeight>window.innerWidth;
-  if(isPortrait){
-    lock.style.display="flex";
-    if(menu)menu.style.display="none";
-    if(game)game.style.display="none";
-  }else{
-    lock.style.display="none";
-  }
+  var isPortrait=window.innerHeight>window.innerWidth&&window.innerWidth<1024;
+  lock.style.display=isPortrait?"flex":"none";
 }
-window.addEventListener("resize",checkOrientation);
-window.addEventListener("orientationchange",function(){setTimeout(checkOrientation,200);});
 
 // ─── Fullscreen on mobile ────────────────────────────
 function goFullscreen(){
   if(!document.fullscreenElement){
     var el=document.documentElement;
-    if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
-    else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
-    else if(el.msRequestFullscreen)el.msRequestFullscreen();
+    try{
+      if(el.requestFullscreen)el.requestFullscreen();
+      else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
+      else if(el.msRequestFullscreen)el.msRequestFullscreen();
+    }catch(e){}
   }
 }
 
 // ─── Init ─────────────────────────────────────────────
-window.addEventListener("resize",()=>{if(document.getElementById("gameUI").style.display!=="none"){resizeCanvas();}});
+window.addEventListener("resize",function(){
+  if(document.getElementById("gameUI").style.display==="flex"){resizeCanvas();}
+  checkOrientation();
+});
+window.addEventListener("orientationchange",function(){setTimeout(checkOrientation,200);});
 window.onload=function(){
   canvas=document.getElementById("gameCanvas");
   ctx=canvas.getContext("2d");
