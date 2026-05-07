@@ -729,14 +729,21 @@ function checkOrientation(){
 
 // ─── Fullscreen on mobile ────────────────────────────
 function goFullscreen(){
-  if(!document.fullscreenElement){
-    var el=document.documentElement;
-    try{
-      if(el.requestFullscreen)el.requestFullscreen();
-      else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
-      else if(el.msRequestFullscreen)el.msRequestFullscreen();
-    }catch(e){}
+  // iOS Safari does NOT support Fullscreen API.
+  // Users can "Add to Home Screen" for true fullscreen (PWA).
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  if(!isIOS){
+    if(!document.fullscreenElement){
+      var el=document.documentElement;
+      try{
+        if(el.requestFullscreen)el.requestFullscreen();
+        else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
+        else if(el.msRequestFullscreen)el.msRequestFullscreen();
+      }catch(e){}
+    }
   }
+  // iOS trick: scroll to hide URL bar
+  setTimeout(function(){window.scrollTo(0,1);},100);
 }
 
 // ─── Init ─────────────────────────────────────────────
